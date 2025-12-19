@@ -863,3 +863,41 @@ body::after{
   color: rgba(255,255,255,0.75);
   font-weight: 500;
 }
+/* ===== Section background images (fade to transparent) ===== */
+.bgSection{
+  position: relative;
+  overflow: hidden;
+}
+
+.bgSection::before{
+  content:"";
+  position:absolute; inset:0;
+  background-image: var(--bg-img);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: .40;
+  pointer-events:none;
+  z-index: 0;
+}
+
+.bgSection > *{
+  position: relative;
+  z-index: 1;
+}
+
+/* fade masks: image fades into transparency (not color) */
+.fade-both::before{
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
+}
+
+.fade-bottom::before{
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 70%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 70%, transparent 100%);
+}
+
+.fade-top::before{
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 100%);
+}
