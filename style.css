@@ -841,3 +841,25 @@ body::after{
   height:22px; width:auto; display:block;
   filter: drop-shadow(0 10px 20px rgba(0,0,0,.55));
 }
+/* XPEL Certification Bar */
+.certBar {
+  padding: 28px 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+}
+
+.certBar__inner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.certBar__text {
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.75);
+  font-weight: 500;
+}
