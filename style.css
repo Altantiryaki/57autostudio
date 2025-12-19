@@ -24,7 +24,7 @@
   --radius2:16px;
   --max: 1160px;
   --pad: 22px;
-  --blur: 16px;
+  --blur: 6px;
   --ease: cubic-bezier(.2,.8,.2,1);
 }
 
@@ -80,7 +80,7 @@ img{max-width:100%; display:block}
   position:sticky;
   top:0;
   z-index:100;
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(18px);
   border-bottom:1px solid rgba(255,255,255,.08);
 }
