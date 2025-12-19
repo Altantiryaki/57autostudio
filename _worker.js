@@ -246,8 +246,7 @@ function fallbackReviews() {
       { author_name: "Sinan Kirlitas", rating: 5, text: "Habe gestern mein Auto Polieren lassen und ich bin mehr als zufrieden. 5 sterne wären zu wenig für diese Arbeit die erbracht wurde. Top Jungs Top Leistung" },
       { author_name: "Andrea Schwarz", rating: 5, text: "Top Innenreinigung meines sehr dreckigen Autos, wurde in Neu Zustand aufbereitet. Preis Leistung Top, super freundliche Mitarbeiter, ich werde euch weiter empfehlen" },
       { author_name: "Monika Fröhlich", rating: 5, text: "Die super netten Jungs haben heute mein Auto gereinigt. Wow, super tolle Arbeit. Auto blitzeblank innen wie außen .Ihr macht euren Weg mit solch toller Leistung.  Liebe zum Detail hat man euch und meinem Auto angesehen ." },
-      { author_name: "Dani", rating: 5, text: "Die Jungs sind klasse und machen eine fantastische Arbeit. Ich habe mein Auto hingebracht, wohlgemerkt ein Hundeauto! Innen sah es sehr sehr schlimm aus. Doch die Jungs haben alle Haare, jeden Fleck und allen Dreck entfernt. Ich bin begeistert und kann 57 Autopflege sehr empfehlen!!
-" }
+      { author_name: "Dani", rating: 5, text: "Die Jungs sind klasse und machen eine fantastische Arbeit. Ich habe mein Auto hingebracht, wohlgemerkt ein Hundeauto! Innen sah es sehr sehr schlimm aus. Doch die Jungs haben alle Haare, jeden Fleck und allen Dreck entfernt. Ich bin begeistert und kann 57 Autopflege sehr empfehlen!!" }
     ]
   };
 }
