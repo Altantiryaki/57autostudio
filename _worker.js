@@ -28,83 +28,83 @@ export default {
     }
 
     // REVIEWS: cached scrape
-if (url.pathname === "/reviews") {
-  const cacheKey = "reviews:v2";
-  const ttl = 345600;      // 4 Tage
-  const cooldown = 900;   // 15min: wenn Google 429, nicht sofort wieder versuchen
+    if (url.pathname === "/reviews") {
+      const cacheKey = "reviews:v2";
+      const ttl = 345600;     // 4 Tage
+      const cooldown = 900;   // 15min
 
-  if (!env.REVIEWS_KV) {
-    return json({ ok: false, error: "Missing KV binding: REVIEWS_KV" }, 500, { "cache-control": "no-store" });
-  }
+      if (!env.REVIEWS_KV) {
+        return json({ ok: false, error: "Missing KV binding: REVIEWS_KV" }, 500, { "cache-control": "no-store" });
+      }
 
-  // read cached (if any)
-  const cached = await env.REVIEWS_KV.get(cacheKey, "text");
-  const last429 = await env.REVIEWS_KV.get("reviews:last429", "text");
+      const cached = await env.REVIEWS_KV.get(cacheKey, "text");
+      const last429 = await env.REVIEWS_KV.get("reviews:last429", "text");
 
-  // if we have cache, serve it immediately
-  if (cached) {
-    // background refresh (only if not in cooldown)
-    const now = Date.now();
-    const last = last429 ? Number(last429) : 0;
+      if (cached) {
+        const now = Date.now();
+        const last = last429 ? Number(last429) : 0;
 
-    if (now - last > cooldown * 1000) {
-      ctx.waitUntil((async () => {
-        try {
-          const out = await scrapeGoogleReviews(env);
-          await env.REVIEWS_KV.put(cacheKey, JSON.stringify(out), { expirationTtl: ttl });
-        } catch (e) {
-          // mark cooldown on 429
-          if (String(e?.message || e).includes(" 429")) {
-            await env.REVIEWS_KV.put("reviews:last429", String(Date.now()), { expirationTtl: cooldown });
-          }
+        if (now - last > cooldown * 1000) {
+          ctx.waitUntil((async () => {
+            try {
+              const out = await scrapeGoogleReviews(env);
+              await env.REVIEWS_KV.put(cacheKey, JSON.stringify(out), { expirationTtl: ttl });
+            } catch (e) {
+              if (String(e?.message || e).includes(" 429")) {
+                await env.REVIEWS_KV.put("reviews:last429", String(Date.now()), { expirationTtl: cooldown });
+              }
+            }
+          })());
         }
-      })());
+
+        return new Response(cached, {
+          status: 200,
+          headers: {
+            ...corsHeaders(),
+            "content-type": "application/json; charset=utf-8",
+            "cache-control": "public, max-age=0, s-maxage=600"
+          }
+        });
+      }
+
+      const now = Date.now();
+      const last = last429 ? Number(last429) : 0;
+      if (now - last <= cooldown * 1000) {
+        return json(fallbackReviews(), 200, {
+          "cache-control": "public, max-age=0, s-maxage=300",
+          "x-reviews-fallback": "1"
+        });
+      }
+
+      try {
+        const out = await scrapeGoogleReviews(env);
+        const body = JSON.stringify(out);
+        await env.REVIEWS_KV.put(cacheKey, body, { expirationTtl: ttl });
+
+        return new Response(body, {
+          status: 200,
+          headers: {
+            ...corsHeaders(),
+            "content-type": "application/json; charset=utf-8",
+            "cache-control": "public, max-age=0, s-maxage=600"
+          }
+        });
+      } catch (e) {
+        if (String(e?.message || e).includes(" 429")) {
+          await env.REVIEWS_KV.put("reviews:last429", String(Date.now()), { expirationTtl: cooldown });
+        }
+
+        return json(fallbackReviews(), 200, {
+          "cache-control": "public, max-age=0, s-maxage=300",
+          "x-reviews-fallback": "1"
+        });
+      }
     }
 
-    return new Response(cached, {
-      status: 200,
-      headers: {
-        ...corsHeaders(),
-        "content-type": "application/json; charset=utf-8",
-        "cache-control": "public, max-age=0, s-maxage=600"
-      }
-    });
-  }
-
-  // cache empty: try fetch once (respect cooldown)
-  const now = Date.now();
-  const last = last429 ? Number(last429) : 0;
-  if (now - last <= cooldown * 1000) {
-    // return deterministic fallback (never 500)
-    return json(fallbackReviews(), 200, {
-      "cache-control": "public, max-age=0, s-maxage=300",
-      "x-reviews-fallback": "1"
-    });
-  }
-
-  try {
-    const out = await scrapeGoogleReviews(env);
-    const body = JSON.stringify(out);
-    await env.REVIEWS_KV.put(cacheKey, body, { expirationTtl: ttl });
-    return new Response(body, {
-      status: 200,
-      headers: {
-        ...corsHeaders(),
-        "content-type": "application/json; charset=utf-8",
-        "cache-control": "public, max-age=0, s-maxage=600"
-      }
-    });
-  } catch (e) {
-    if (String(e?.message || e).includes(" 429")) {
-      await env.REVIEWS_KV.put("reviews:last429", String(Date.now()), { expirationTtl: cooldown });
-    }
-    // never 500 if cache empty + blocked: return fallback JSON
-    return json(fallbackReviews(), 200, {
-      "cache-control": "public, max-age=0, s-maxage=300",
-      "x-reviews-fallback": "1"
-    });
-  }
-}
+    // Everything else: Pages assets / pretty URLs
+    return env.ASSETS.fetch(request);
+  },
+};
 
 function corsHeaders() {
   return {
