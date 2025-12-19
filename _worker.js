@@ -1,169 +1,125 @@
-// Optional: Fallback, falls du den Key/PlaceID nicht über env setzt.
-// >>> HIER deine echten Werte eintragen (oder leer lassen, wenn du nur env nutzt)
-const FALLBACK_GOOGLE_PLACE_ID = "ChIJOWn9FC7VmUcRitgY38HREJM";
-
-// Holt die Google Reviews über Places Details API
-async function handleReviews(env) {
-  const apiKey = env.GOOGLE_PLACES_API_KEY || env.GOOGLE_API_KEY || FALLBACK_GOOGLE_PLACES_API_KEY;
-  const placeId = env.GOOGLE_PLACES_PLACE_ID || env.GOOGLE_PLACE_ID || FALLBACK_GOOGLE_PLACE_ID;
-
-  if (!apiKey || !placeId) {
-    // Kein Key / Place ID gesetzt -> leere Antwort (Seite bleibt sauber)
-    return new Response(
-      JSON.stringify({ reviews: [] }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
-        }
-      }
-    );
-  }
-  
-const apiUrl = `https://maps.googleapis.com/maps/api/place/details/json`
-  + `?place_id=${encodeURIComponent(placeId)}`
-  + `&fields=rating,user_ratings_total,reviews`
-  + `&reviews_sort=newest`
-  + `&language=de`
-  + `&reviews_no_translations=true`
-  + `&key=${encodeURIComponent(apiKey)}`;
-
-  try {
-    const resp = await fetch(apiUrl);
-    if (!resp.ok) {
-      console.error("Google Places API error:", resp.status, resp.statusText);
-      return new Response(
-        JSON.stringify({ reviews: [] }),
-        {
-          status: 200,
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
-          }
-        }
-      );
-    }
-
-    const data = await resp.json();
-
-    const reviews = (data?.result?.reviews || []).map(r => ({
-      author_name: r.author_name,
-      rating: r.rating,
-      relative_time: r.relative_time_description,
-      text: r.text
-    }));
-
-    return new Response(
-      JSON.stringify({ reviews }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
-        }
-      }
-    );
-  } catch (err) {
-    console.error("handleReviews exception:", err);
-    return new Response(
-      JSON.stringify({ reviews: [] }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
-        }
-      }
-    );
-  }
-}
-
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    // Preflight
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        status: 204,
+        headers: corsHeaders(),
+      });
+    }
 
     // DEBUG: env check
     if (url.pathname === "/__env") {
       const cid = (env.GOOGLE_MAPS_CID ?? "");
       const gUrl = (env.GOOGLE_MAPS_URL ?? "");
-      return new Response(JSON.stringify({
+      const hasKV = Boolean(env.REVIEWS_KV);
+
+      return json({
         ok: true,
         hasCID: Boolean(cid && cid.trim().length),
         cidLen: cid.length,
         cidPreview: cid ? cid.slice(0, 6) + "..." + cid.slice(-6) : null,
         hasURL: Boolean(gUrl && gUrl.trim().length),
-        urlLen: gUrl.length
-      }), { headers: { "content-type": "application/json; charset=utf-8" } });
-    }
-
-    // IMPORTANT: /reviews must be handled BEFORE assets
-if (url.pathname === "/reviews") {
-  const cacheKey = "reviews:v1";
-
-  // 1) KV Cache first
-  const cached = await env.REVIEWS_KV.get(cacheKey, "text");
-  if (cached) {
-    return new Response(cached, {
-      headers: {
-        "content-type": "application/json; charset=utf-8",
-        "access-control-allow-origin": "*",
-        "cache-control": "public, max-age=0, s-maxage=1800"
-      }
-    });
-  }
-
-  // 2) Fetch from Google
-  try {
-    const out = await scrapeGoogleReviews(env);
-    const body = JSON.stringify(out);
-
-    await env.REVIEWS_KV.put(cacheKey, body, {
-      expirationTtl: 1800 // 30 Minuten
-    });
-
-    return new Response(body, {
-      headers: {
-        "content-type": "application/json; charset=utf-8",
-        "access-control-allow-origin": "*",
-        "cache-control": "public, max-age=0, s-maxage=1800"
-      }
-    });
-  } catch (e) {
-    // 3) Fallback: stale cache
-    const stale = await env.REVIEWS_KV.get(cacheKey, "text");
-    if (stale) {
-      return new Response(stale, {
-        headers: {
-          "content-type": "application/json; charset=utf-8",
-          "access-control-allow-origin": "*",
-          "x-reviews-stale": "1"
-        }
+        urlLen: gUrl.length,
+        hasKV
       });
     }
 
-    return new Response(JSON.stringify({
-      ok: false,
-      error: "Google blocked & no cache yet"
-    }), {
-      status: 500,
-      headers: {
-        "content-type": "application/json; charset=utf-8",
-        "access-control-allow-origin": "*"
+    // REVIEWS: cached scrape
+    if (url.pathname === "/reviews") {
+      const cacheKey = "reviews:v1";
+      const ttl = 1800; // 30min
+
+      if (!env.REVIEWS_KV) {
+        return json({ ok: false, error: "Missing KV binding: REVIEWS_KV" }, 500, {
+          "cache-control": "no-store",
+        });
       }
-    });
-  }
+
+      // 1) KV cache first
+      const cached = await env.REVIEWS_KV.get(cacheKey, "text");
+      if (cached) {
+        return new Response(cached, {
+          status: 200,
+          headers: {
+            ...corsHeaders(),
+            "content-type": "application/json; charset=utf-8",
+            "cache-control": `public, max-age=0, s-maxage=${ttl}`,
+          },
+        });
+      }
+
+      // 2) Fetch from Google
+      try {
+        const out = await scrapeGoogleReviews(env);
+        const body = JSON.stringify(out);
+
+        await env.REVIEWS_KV.put(cacheKey, body, { expirationTtl: ttl });
+
+        return new Response(body, {
+          status: 200,
+          headers: {
+            ...corsHeaders(),
+            "content-type": "application/json; charset=utf-8",
+            "cache-control": `public, max-age=0, s-maxage=${ttl}`,
+          },
+        });
+      } catch (e) {
+        // 3) stale fallback
+        const stale = await env.REVIEWS_KV.get(cacheKey, "text");
+        if (stale) {
+          return new Response(stale, {
+            status: 200,
+            headers: {
+              ...corsHeaders(),
+              "content-type": "application/json; charset=utf-8",
+              "x-reviews-stale": "1",
+              "cache-control": "public, max-age=0, s-maxage=600",
+            },
+          });
+        }
+
+        return json(
+          { ok: false, error: String(e?.message || e) },
+          500,
+          { "cache-control": "no-store" }
+        );
+      }
+    }
+
+    // Everything else: Pages assets / pretty URLs
+    return env.ASSETS.fetch(request);
+  },
+};
+
+function corsHeaders() {
+  return {
+    "access-control-allow-origin": "*",
+    "access-control-allow-methods": "GET, OPTIONS",
+    "access-control-allow-headers": "content-type",
+  };
+}
+
+function json(obj, status = 200, extraHeaders = {}) {
+  return new Response(JSON.stringify(obj), {
+    status,
+    headers: {
+      ...corsHeaders(),
+      "content-type": "application/json; charset=utf-8",
+      ...extraHeaders,
+    },
+  });
 }
 
 function buildMapsUrl(env) {
-  if (env.GOOGLE_MAPS_URL && String(env.GOOGLE_MAPS_URL).trim()) {
-    const u = String(env.GOOGLE_MAPS_URL).trim();
-    return u + (u.includes("?") ? "&" : "?") + "hl=de";
-  }
-  if (env.GOOGLE_MAPS_CID && String(env.GOOGLE_MAPS_CID).trim()) {
-    const cid = String(env.GOOGLE_MAPS_CID).trim();
-    return `https://www.google.com/maps?cid=${encodeURIComponent(cid)}&hl=de`;
-  }
+  const url = (env.GOOGLE_MAPS_URL ?? "").trim();
+  const cid = (env.GOOGLE_MAPS_CID ?? "").trim();
+
+  if (url) return url + (url.includes("?") ? "&" : "?") + "hl=de";
+  if (cid) return `https://www.google.com/maps?cid=${encodeURIComponent(cid)}&hl=de`;
+
   throw new Error("Missing env: GOOGLE_MAPS_CID or GOOGLE_MAPS_URL");
 }
 
@@ -182,7 +138,7 @@ async function scrapeGoogleReviews(env) {
   const html = await res.text();
 
   const blocks = extractAfInitDataBlocks(html);
-  if (!blocks.length) throw new Error("No AF_initDataCallback blocks found (Google layout changed / blocked)");
+  if (!blocks.length) throw new Error("No AF_initDataCallback blocks found (blocked/changed)");
 
   blocks.sort((a, b) => b.length - a.length);
   const raw = blocks[0];
@@ -199,14 +155,12 @@ async function scrapeGoogleReviews(env) {
 
   const reviews = findReviews(parsed);
 
-  // IMPORTANT: return same shape your frontend expects
   return {
     ok: true,
     updatedAt: new Date().toISOString(),
     reviews: reviews.map(r => ({
       author_name: r.author,
       rating: r.rating,
-      relative_time: r.relative_time || "",
       text: r.text
     }))
   };
@@ -263,7 +217,5 @@ function parseReviewTuple(arr) {
   const author = short[0];
 
   if (!author || !text || author === text) return null;
-
   return { author, rating, text };
 }
-
