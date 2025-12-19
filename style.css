@@ -206,9 +206,8 @@ img{max-width:100%; display:block}
 .hero__bg{
   position:absolute; inset:-1px;
   background:
-    radial-gradient(1200px 760px at 22% 12%, rgba(255,255,255,.10), transparent 60%),
-    radial-gradient(900px 680px at 78% 18%, rgba(255,255,255,.06), transparent 62%),
-    linear-gradient(180deg, rgba(7,8,13,.06), rgba(7,8,13,.92));
+    radial-gradient(1200px 760px at 22% 12%, rgba(255,255,255,.08), transparent 62%),
+    radial-gradient(900px 680px at 78% 18%, rgba(255,255,255,.05), transparent 66%);
 }
 .hero__inner{
   position:relative;
