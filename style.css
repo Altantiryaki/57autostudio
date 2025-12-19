@@ -953,5 +953,6 @@ body::after{
 @media (max-width: 768px){
   :root{
     --sectionY: 120px;
+    --sectionY-tight: 120px; /* oder 140px, wenn du Reviews etwas luftiger willst */
   }
 }
