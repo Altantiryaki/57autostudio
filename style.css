@@ -922,8 +922,8 @@ body::after{
 }
 
 .fade-top::before{
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 100%);
-  mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 55%, black 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 55%, black 100%);
 }
 /* Glass: 6px blur */
 .glass6{
