@@ -274,26 +274,31 @@
       const p = (window.scrollY / max) * 100;
       doc.style.setProperty("--sp", p.toFixed(3));
 
-      // Spotlight follows viewport center
-      const vh = window.innerHeight;
-      spotSecs.forEach(sec => {
-        if (isInFooter(sec)) return;
-        const r = sec.getBoundingClientRect();
-        const cx = 50; // keep centered horizontally (looks premium)
-        const cy = ((vh * 0.5 - r.top) / r.height) * 100;
-        sec.style.setProperty("--sx", `${cx}%`);
-        sec.style.setProperty("--sy", `${Math.max(15, Math.min(85, cy))}%`);
-      });
+const vh = window.innerHeight;
 
-      // Divider glow: progress within section
-      divGlows.forEach(line => {
-        if (isInFooter(line)) return;
-        const sec = line.closest("section") || line.parentElement;
-        const r = sec.getBoundingClientRect();
-        const t = (vh * 0.65 - r.top) / (r.height || 1);
-        const dp = Math.max(0, Math.min(1, t));
-        line.style.setProperty("--dp", dp.toFixed(3));
-      });
+// Spotlight nur für Sections, die wirklich im Viewport sind
+spotSecs.forEach(sec => {
+  if (isInFooter(sec)) return;
+  const r = sec.getBoundingClientRect();
+  if (r.bottom < 0 || r.top > vh) return; // <-- wichtig
+
+  const cx = 50;
+  const cy = ((vh * 0.5 - r.top) / (r.height || 1)) * 100;
+  sec.style.setProperty("--sx", `${cx}%`);
+  sec.style.setProperty("--sy", `${Math.max(15, Math.min(85, cy))}%`);
+});
+
+// Divider glow nur wenn sichtbar
+divGlows.forEach(line => {
+  if (isInFooter(line)) return;
+  const sec = line.closest("section") || line.parentElement;
+  const r = sec.getBoundingClientRect();
+  if (r.bottom < 0 || r.top > vh) return; // <-- wichtig
+
+  const t = (vh * 0.65 - r.top) / (r.height || 1);
+  const dp = Math.max(0, Math.min(1, t));
+  line.style.setProperty("--dp", dp.toFixed(3));
+});
     });
   };
 
