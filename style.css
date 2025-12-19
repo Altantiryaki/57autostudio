@@ -483,6 +483,7 @@ img{max-width:100%; display:block}
 /* FIX: Footer/Button immer unten */
 .card__bottom{
   margin-top:auto;
+  padding-top:24px;
 }
 /* Note */
 .noteBox{
