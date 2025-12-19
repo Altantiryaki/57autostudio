@@ -65,7 +65,7 @@ img{max-width:100%; display:block}
   width:4px; height:4px; display:inline-block;
   border-radius:999px;
   background:rgba(255,255,255,.20);
-  transform:translateY(-2px);
+  transform: none;
 }
 
 .link{
