@@ -101,29 +101,28 @@ export default {
 if (url.pathname === "/reviews") {
   const cacheKey = "reviews:v1";
 
-  // 1) Try KV cache first
-  const cached = await env.REVIEWS_KV?.get(cacheKey, "text");
+  // 1) KV Cache first
+  const cached = await env.REVIEWS_KV.get(cacheKey, "text");
   if (cached) {
     return new Response(cached, {
-      status: 200,
       headers: {
         "content-type": "application/json; charset=utf-8",
         "access-control-allow-origin": "*",
-        "cache-control": "public, max-age=0, s-maxage=1800" // 30min edge hint
+        "cache-control": "public, max-age=0, s-maxage=1800"
       }
     });
   }
 
-  // 2) Fetch fresh
+  // 2) Fetch from Google
   try {
     const out = await scrapeGoogleReviews(env);
     const body = JSON.stringify(out);
 
-    // store 30 minutes
-    await env.REVIEWS_KV?.put(cacheKey, body, { expirationTtl: 1800 });
+    await env.REVIEWS_KV.put(cacheKey, body, {
+      expirationTtl: 1800 // 30 Minuten
+    });
 
     return new Response(body, {
-      status: 200,
       headers: {
         "content-type": "application/json; charset=utf-8",
         "access-control-allow-origin": "*",
@@ -131,26 +130,26 @@ if (url.pathname === "/reviews") {
       }
     });
   } catch (e) {
-    // 3) If blocked (429 etc), try stale cache if any
-    const stale = await env.REVIEWS_KV?.get(cacheKey, "text");
+    // 3) Fallback: stale cache
+    const stale = await env.REVIEWS_KV.get(cacheKey, "text");
     if (stale) {
       return new Response(stale, {
-        status: 200,
         headers: {
           "content-type": "application/json; charset=utf-8",
           "access-control-allow-origin": "*",
-          "cache-control": "public, max-age=0, s-maxage=600",
           "x-reviews-stale": "1"
         }
       });
     }
 
-    return new Response(JSON.stringify({ ok: false, error: String(e?.message || e) }), {
+    return new Response(JSON.stringify({
+      ok: false,
+      error: "Google blocked & no cache yet"
+    }), {
       status: 500,
       headers: {
         "content-type": "application/json; charset=utf-8",
-        "access-control-allow-origin": "*",
-        "cache-control": "no-store"
+        "access-control-allow-origin": "*"
       }
     });
   }
