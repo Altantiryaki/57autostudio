@@ -417,7 +417,12 @@ img{max-width:100%; display:block}
     linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
   box-shadow: var(--shadow2);
   padding: 18px 16px;
+
+  /* FIX: gleiche Höhe + Button immer unten */
+  display:flex;
+  flex-direction:column;
 }
+
 .card__top{
   display:flex;
   justify-content:space-between;
@@ -425,6 +430,7 @@ img{max-width:100%; display:block}
   gap:12px;
   margin-bottom:10px;
 }
+
 .chip{
   font-size:12px;
   letter-spacing:.35px;
@@ -435,18 +441,21 @@ img{max-width:100%; display:block}
   background:rgba(0,0,0,.10);
   color:rgba(237,239,248,.78);
 }
+
 .h3{
   margin:0;
   font-weight:500;
   letter-spacing:-.25px;
   font-size:18px;
 }
+
 .p{
   margin:10px 0 0;
   color:rgba(237,239,248,.70);
   line-height:1.6;
   font-size:14.8px;
 }
+
 .list{
   margin:14px 0 0;
   padding:0;
@@ -454,12 +463,14 @@ img{max-width:100%; display:block}
   display:grid;
   gap:8px;
 }
+
 .list li{
   position:relative;
   padding-left:18px;
   color:rgba(237,239,248,.70);
   font-size:14px;
 }
+
 .list li::before{
   content:"";
   position:absolute; left:0; top:.65em;
@@ -468,8 +479,11 @@ img{max-width:100%; display:block}
   background:rgba(255,255,255,.70);
   box-shadow: 0 0 0 4px rgba(255,255,255,.10);
 }
-.card__bottom{margin-top:16px}
 
+/* FIX: Footer/Button immer unten */
+.card__bottom{
+  margin-top:auto;
+}
 /* Note */
 .noteBox{
   margin-top:14px;
