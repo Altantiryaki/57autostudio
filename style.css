@@ -876,7 +876,7 @@ body::after{
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: .40;
+  opacity: .25;
   pointer-events:none;
   z-index: 0;
 }
