@@ -1059,3 +1059,9 @@ body::after{
   transform-origin: 50% 50%;
   will-change: transform, opacity;
 }
+
+@media (max-width: 768px){
+  :root{
+    --sectionY: 120px;
+  }
+}
