@@ -675,17 +675,6 @@ img{max-width:100%; display:block}
 }
 
 /* Global background (smooth, no hard section cuts) */
-.globalBg{
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(900px 520px at 18% 10%, rgba(124, 175, 255, .14), transparent 55%),
-    radial-gradient(820px 520px at 80% 20%, rgba(147, 107, 255, .10), transparent 60%),
-    radial-gradient(760px 560px at 55% 85%, rgba(46, 204, 255, .10), transparent 58%),
-    linear-gradient(180deg, rgba(6, 8, 14, 1) 0%, rgba(7, 9, 16, 1) 55%, rgba(5, 7, 12, 1) 100%);
-}
 .globalBg::before{
   content:"";
   position:absolute;
