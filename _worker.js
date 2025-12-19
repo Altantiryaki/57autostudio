@@ -83,49 +83,68 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
+    // DEBUG: env check
     if (url.pathname === "/__env") {
       const cid = (env.GOOGLE_MAPS_CID ?? "");
       const gUrl = (env.GOOGLE_MAPS_URL ?? "");
-
       return new Response(JSON.stringify({
         ok: true,
         hasCID: Boolean(cid && cid.trim().length),
         cidLen: cid.length,
-        cidPreview: cid
-          ? cid.slice(0, 6) + "..." + cid.slice(-6)
-          : null,
+        cidPreview: cid ? cid.slice(0, 6) + "..." + cid.slice(-6) : null,
         hasURL: Boolean(gUrl && gUrl.trim().length),
-        urlLen: gUrl.length,
-      }), {
-        headers: { "content-type": "application/json; charset=utf-8" }
-      });
+        urlLen: gUrl.length
+      }), { headers: { "content-type": "application/json; charset=utf-8" } });
     }
 
-    // alles andere normal über Pages
+    // IMPORTANT: /reviews must be handled BEFORE assets
+    if (url.pathname === "/reviews") {
+      try {
+        const out = await scrapeGoogleReviews(env);
+        return new Response(JSON.stringify(out), {
+          status: 200,
+          headers: {
+            "content-type": "application/json; charset=utf-8",
+            "access-control-allow-origin": "*",
+            "cache-control": "public, max-age=0, s-maxage=600"
+          }
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ ok: false, error: String(e?.message || e) }), {
+          status: 500,
+          headers: {
+            "content-type": "application/json; charset=utf-8",
+            "access-control-allow-origin": "*",
+            "cache-control": "no-store"
+          }
+        });
+      }
+    }
+
+    // Everything else: Pages handles pretty URLs
     return env.ASSETS.fetch(request);
-  },
+  }
 };
 
-function json(obj, status = 200, extraHeaders = {}) {
-  return new Response(JSON.stringify(obj), {
-    status,
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-      "access-control-allow-origin": "*",
-      "access-control-allow-methods": "GET, OPTIONS",
-      "access-control-allow-headers": "content-type",
-      ...extraHeaders,
-    },
-  });
+function buildMapsUrl(env) {
+  if (env.GOOGLE_MAPS_URL && String(env.GOOGLE_MAPS_URL).trim()) {
+    const u = String(env.GOOGLE_MAPS_URL).trim();
+    return u + (u.includes("?") ? "&" : "?") + "hl=de";
+  }
+  if (env.GOOGLE_MAPS_CID && String(env.GOOGLE_MAPS_CID).trim()) {
+    const cid = String(env.GOOGLE_MAPS_CID).trim();
+    return `https://www.google.com/maps?cid=${encodeURIComponent(cid)}&hl=de`;
+  }
+  throw new Error("Missing env: GOOGLE_MAPS_CID or GOOGLE_MAPS_URL");
 }
 
 async function scrapeGoogleReviews(env) {
   const target = buildMapsUrl(env);
+
   const res = await fetch(target, {
     headers: {
-      // mimic a normal browser a bit
       "user-agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
       "accept-language": "de-DE,de;q=0.9,en;q=0.8",
     },
   });
@@ -133,52 +152,38 @@ async function scrapeGoogleReviews(env) {
   if (!res.ok) throw new Error(`Google fetch failed: ${res.status}`);
   const html = await res.text();
 
-  // Extract AF_initDataCallback blocks (Google embeds big JS arrays there)
   const blocks = extractAfInitDataBlocks(html);
-  if (!blocks.length) throw new Error("No AF_initDataCallback blocks found");
+  if (!blocks.length) throw new Error("No AF_initDataCallback blocks found (Google layout changed / blocked)");
 
-  // Heuristic: pick the biggest block and try to locate reviews inside
   blocks.sort((a, b) => b.length - a.length);
   const raw = blocks[0];
 
-  // raw is a JS array literal (usually valid JSON). Parse it.
   let parsed;
   try {
     parsed = JSON.parse(raw);
   } catch {
-    // fallback: sometimes it contains \x.. or weird escapes; try to clean minimal
-    const cleaned = raw
-      .replace(/\\x([0-9A-Fa-f]{2})/g, (_, h) =>
-        String.fromCharCode(parseInt(h, 16))
-      );
+    const cleaned = raw.replace(/\\x([0-9A-Fa-f]{2})/g, (_, h) =>
+      String.fromCharCode(parseInt(h, 16))
+    );
     parsed = JSON.parse(cleaned);
   }
 
   const reviews = findReviews(parsed);
 
+  // IMPORTANT: return same shape your frontend expects
   return {
     ok: true,
-    source: "google-maps-scrape",
     updatedAt: new Date().toISOString(),
-    count: reviews.length,
-    reviews,
+    reviews: reviews.map(r => ({
+      author_name: r.author,
+      rating: r.rating,
+      relative_time: r.relative_time || "",
+      text: r.text
+    }))
   };
 }
 
-function buildMapsUrl(env) {
-  if (env.GOOGLE_MAPS_URL) {
-    return env.GOOGLE_MAPS_URL + (env.GOOGLE_MAPS_URL.includes("?") ? "&" : "?") + "hl=de";
-  }
-  if (env.GOOGLE_MAPS_CID) {
-    return `https://www.google.com/maps?cid=${encodeURIComponent(
-      env.GOOGLE_MAPS_CID
-    )}&hl=de`;
-  }
-  throw new Error("Missing env: GOOGLE_MAPS_CID or GOOGLE_MAPS_URL");
-}
-
 function extractAfInitDataBlocks(html) {
-  // Matches: AF_initDataCallback({key: 'ds:1', data: [...], sideChannel: {...}});
   const out = [];
   const re = /AF_initDataCallback\(\{[\s\S]*?data:([\s\S]*?),\s*sideChannel:[\s\S]*?\}\);/g;
   let m;
@@ -190,19 +195,12 @@ function extractAfInitDataBlocks(html) {
 }
 
 function findReviews(root) {
-  // We walk the nested arrays and look for review-like tuples.
-  // Google review entries typically contain:
-  // - author name (string)
-  // - rating (number 1..5)
-  // - text (string)
-  // - time (string or timestamp)
   const results = [];
-
   const seen = new Set();
+
   const walk = (node) => {
     if (!node) return;
     if (Array.isArray(node)) {
-      // Try to interpret as review record
       const maybe = parseReviewTuple(node);
       if (maybe) {
         const key = maybe.author + "|" + maybe.text.slice(0, 40);
@@ -214,47 +212,29 @@ function findReviews(root) {
       for (const x of node) walk(x);
     }
   };
-  walk(root);
 
-  // Keep a sane max
+  walk(root);
   return results.slice(0, 30);
 }
 
 function parseReviewTuple(arr) {
-  // Very defensive heuristic.
-  // We look for: [ ..., [authorName, ...], ..., rating, ..., text, ...]
-  // This changes often; we just hunt for plausible fields.
-  let author = null;
   let rating = null;
-  let text = null;
-
-  // find rating
   for (const v of arr) {
-    if (typeof v === "number" && v >= 1 && v <= 5) {
-      rating = v;
-      break;
-    }
+    if (typeof v === "number" && v >= 1 && v <= 5) { rating = v; break; }
   }
   if (rating == null) return null;
 
-  // find longest text-ish string
-  const strings = arr.filter((v) => typeof v === "string" && v.length >= 8);
+  const strings = arr.filter(v => typeof v === "string" && v.length >= 6);
   if (!strings.length) return null;
 
-  // text usually longer than author
   strings.sort((a, b) => b.length - a.length);
-  text = strings[0];
+  const text = strings[0];
 
-  // author: shortest reasonable string
   const short = strings.slice().sort((a, b) => a.length - b.length);
-  author = short[0];
+  const author = short[0];
 
-  // prevent false positives: author shouldn't be same as text
   if (!author || !text || author === text) return null;
 
-  return {
-    author,
-    rating,
-    text,
-  };
+  return { author, rating, text };
 }
+
