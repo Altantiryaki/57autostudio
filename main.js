@@ -35,8 +35,19 @@
     });
   }
 
-  // Reveal on scroll
-  const els = qsa('.reveal');
+  // Premium Reveal on scroll (exclude footer)
+  const all = qsa('.reveal');
+  const els = all.filter(el => !el.closest('footer') && !el.closest('.footer'));
+
+  // Stagger: auto delay inside common groups
+  const staggerGroups = ['.hero__copy', '.trustRow', '.cards', '.steps', '.sectionHead'];
+  staggerGroups.forEach(sel => {
+    qsa(sel).forEach(group => {
+      const kids = qsa('.reveal', group).filter(x => !x.closest('footer') && !x.closest('.footer'));
+      kids.forEach((k, i) => k.style.setProperty('--d', `${i * 90}ms`));
+    });
+  });
+
   const io = new IntersectionObserver((entries) => {
     for (const ent of entries) {
       if (ent.isIntersecting) {
@@ -44,8 +55,63 @@
         io.unobserve(ent.target);
       }
     }
-  }, { threshold: 0.12 });
+  }, { threshold: 0.18, rootMargin: "0px 0px -10% 0px" });
+
   els.forEach(el => io.observe(el));
+
+  // Parallax background for .bgSection (Keynote vibe)
+  const bgSections = qsa('.bgSection');
+  let ticking = false;
+
+  function updateParallax(){
+    ticking = false;
+    const vh = window.innerHeight;
+
+    bgSections.forEach(sec => {
+      const r = sec.getBoundingClientRect();
+      const t = ((r.top + r.height * 0.5) - vh * 0.5) / (vh * 0.9);
+      const p = Math.max(-1, Math.min(1, t));
+      sec.style.setProperty('--p', `${p * 28}px`);
+    });
+  }
+
+  function onScroll(){
+    if (!ticking){
+      ticking = true;
+      requestAnimationFrame(updateParallax);
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  // Specular highlight for glass6
+  qsa('.glass6').forEach(el => {
+    el.addEventListener('pointermove', (ev) => {
+      const r = el.getBoundingClientRect();
+      const x = ((ev.clientX - r.left) / r.width) * 100;
+      const y = ((ev.clientY - r.top) / r.height) * 100;
+      el.style.setProperty('--mx', `${x}%`);
+      el.style.setProperty('--my', `${y}%`);
+      el.classList.add('is-hot');
+    });
+    el.addEventListener('pointerleave', () => el.classList.remove('is-hot'));
+  });
+
+  // Subtle magnetic hover for pills (desktop-ish feel)
+  qsa('.pill').forEach(el => {
+    el.addEventListener('pointermove', (ev) => {
+      const r = el.getBoundingClientRect();
+      const dx = (ev.clientX - (r.left + r.width/2)) / r.width;
+      const dy = (ev.clientY - (r.top + r.height/2)) / r.height;
+      el.style.transform = `translate3d(${dx * 6}px, ${dy * 6}px, 0)`;
+    });
+    el.addEventListener('pointerleave', () => {
+      el.style.transform = '';
+    });
+  });
+
 
   // Google Reviews (live via Worker endpoint /reviews)
   const track = qs('#reviews-track');
