@@ -864,37 +864,48 @@ body::after{
   filter: drop-shadow(0 10px 20px rgba(0,0,0,.55));
 }
 
-/* XPEL Certification Bar */
-.certBar {
+/* ===== XPEL Certification Bar (fixed, no CSS breakage) ===== */
+.certBar{
   padding: 28px 0;
-  border-top: 1px solid rgba(255,255,255,0.06);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  background: rgba(255,255,255,0.02);
+  border-top: 1px solid rgba(255,255,255,.06);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  background: rgba(255,255,255,.02);
 }
 
-.certBar__inner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
+.certBar__inner{
+  display:flex;
+  justify-content:center;
 }
-.certBar__text {
-  font-size: 0.9rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.75);
-  font-weight: 500;
+
+.certBar__content{
+  display:flex;
+  flex-direction:column;   /* logo above text */
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  text-align:center;
+}
+
 .certBar__logo{
-  height:18px;
+  height:24px;
   width:auto;
+  max-width:160px;
   display:block;
 }
 
-/* Mobile Feintuning */
-@media (max-width: 768px){
-  .certBar__logo{ height:16px; }
-  .certBar__content{ gap:10px; }
+.certBar__text{
+  font-size:12px;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.78);
+  font-weight:500;
 }
+
+@media (max-width:768px){
+  .certBar__logo{ height:22px; }
+  .certBar__text{ font-size:11px; letter-spacing:.24em; }
+}
+
 
 }
 /* ===== Section background images (fade to transparent) ===== */
