@@ -30,7 +30,7 @@ export default {
     // REVIEWS: cached scrape
 if (url.pathname === "/reviews") {
   const cacheKey = "reviews:v2";
-  const ttl = 21600;      // 6h
+  const ttl = 345600;      // 4 Tage
   const cooldown = 900;   // 15min: wenn Google 429, nicht sofort wieder versuchen
 
   if (!env.REVIEWS_KV) {
