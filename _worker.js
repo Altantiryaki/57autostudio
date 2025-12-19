@@ -83,28 +83,43 @@ const apiUrl = `https://maps.googleapis.com/maps/api/place/details/json`
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    const pathname = url.pathname;
 
-    // 1) Reviews Endpoint
-    if (url.pathname === "/reviews") {
+    // 1) Reviews-Endpoint abfangen
+    if (pathname === "/reviews") {
       return handleReviews(env);
     }
 
-    // 2) Erst: Pages/ASSETS selbst entscheiden lassen (Pretty URLs!)
-    let res = await env.ASSETS.fetch(request);
-    if (res.status !== 404) return res;
+    // 2) Asset-Routing: /exclusive -> /exclusive.html etc.
+    let pathToFile = pathname;
 
-    // 3) Fallback: wenn Clean URL nicht gefunden, dann .html probieren
-    // z.B. /xpel -> /xpel.html
-    if (!url.pathname.includes(".") && url.pathname !== "/") {
-      const htmlUrl = new URL(request.url);
-      htmlUrl.pathname = `${url.pathname}.html`;
-      res = await env.ASSETS.fetch(new Request(htmlUrl.toString(), request));
-      if (res.status !== 404) return res;
+    // Wenn kein Punkt im Pfad, behandeln wir es als "clean URL"
+    if (!pathToFile.includes(".")) {
+      if (pathToFile === "/") {
+        pathToFile = "/index.html";
+      } else {
+        pathToFile = `${pathToFile}.html`;
+      }
     }
 
-    // 4) Letzter Fallback: index
-    const idx = new URL(request.url);
-    idx.pathname = "/index.html";
-    return env.ASSETS.fetch(new Request(idx.toString(), request));
+    try {
+      // Versuche, die angefragte Datei aus dem Asset-Bundle zu holen
+      const assetResponse = await env.ASSETS.fetch(
+        new Request(url.origin + pathToFile, request)
+      );
+
+      // Wenn gefunden, zurückgeben
+      if (assetResponse.status !== 404) {
+        return assetResponse;
+      }
+    } catch (e) {
+      // Ignorieren und auf Fallback gehen
+      console.error("Asset fetch error:", e);
+    }
+
+    // 3) Fallback: immer index.html ausliefern (z.B. für 404 oder SPA)
+    return env.ASSETS.fetch(
+      new Request(url.origin + "/index.html", request)
+    );
   }
 };
