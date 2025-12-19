@@ -83,23 +83,25 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    if (url.pathname === "/reviews") {
-      try {
-        const data = await scrapeGoogleReviews(env);
+    if (url.pathname === "/__env") {
+      const cid = (env.GOOGLE_MAPS_CID ?? "");
+      const gUrl = (env.GOOGLE_MAPS_URL ?? "");
 
-        return json(data, 200, {
-          "cache-control": "public, max-age=0, s-maxage=600",
-        });
-      } catch (err) {
-        return json(
-          { ok: false, error: String(err?.message || err) },
-          500,
-          { "cache-control": "no-store" }
-        );
-      }
+      return new Response(JSON.stringify({
+        ok: true,
+        hasCID: Boolean(cid && cid.trim().length),
+        cidLen: cid.length,
+        cidPreview: cid
+          ? cid.slice(0, 6) + "..." + cid.slice(-6)
+          : null,
+        hasURL: Boolean(gUrl && gUrl.trim().length),
+        urlLen: gUrl.length,
+      }), {
+        headers: { "content-type": "application/json; charset=utf-8" }
+      });
     }
 
-    // Everything else: Pages handles pretty URLs
+    // alles andere normal über Pages
     return env.ASSETS.fetch(request);
   },
 };
