@@ -237,8 +237,8 @@ function fallbackReviews() {
     ok: true,
     updatedAt: new Date().toISOString(),
     reviews: [
-      { author_name: "Google Bewertung", rating: 5, text: "Bewertungen werden geladen." },
-      { author_name: "Hinweis", rating: 5, text: "Falls Google kurzfristig blockt, zeigen wir automatisch wieder Live-Reviews sobald verfügbar." }
+      { author_name: "Bewertung", rating: 5, text: "Kundenfeedback wird geladen." },
+      { author_name: "Info", rating: 5, text: "Die Anzeige aktualisiert sich automatisch." }
     ]
   };
 }
