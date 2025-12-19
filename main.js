@@ -47,96 +47,46 @@
   }, { threshold: 0.12 });
   els.forEach(el => io.observe(el));
 
-  // Reviews rail: auto-scrolling (no avatars, only name + stars + text)
-  const rail = qs('#reviewRail');
-  if (rail) {
-    hydrateReviews()
-      .then((items) => {
-        if (!items || !items.length) return;
-        renderRail(items);
-        enableAutoScroll();
-      })
-      .catch(() => {});
-  }
+  // Google Reviews (live via Worker endpoint /reviews)
+  const track = qs('#reviews-track');
+  if (track) loadReviews(track);
 
-  async function hydrateReviews(){
-    // Option A: inline snippets
-    if (Array.isArray(window.REVIEW_SNIPPETS) && window.REVIEW_SNIPPETS.length) {
-      return window.REVIEW_SNIPPETS;
-    }
-    // Option B: local file
+  async function loadReviews(trackEl){
     try{
-      const res = await fetch('./reviews.json', { cache: 'no-store' });
-      if (!res.ok) return [];
-      const data = await res.json();
-      if (Array.isArray(data)) return data;
-      if (Array.isArray(data.items)) return data.items;
-      return [];
-    }catch{
-      return [];
-    }
-  }
+      const resp = await fetch('/reviews', { cache: 'no-store' });
+      if (!resp.ok) return;
+      const data = await resp.json();
+      const reviews = Array.isArray(data.reviews) ? data.reviews.slice(0, 8) : [];
+      if (!reviews.length) return;
 
-  function renderRail(snippets){
-    const clamp = (s, n) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
-    const safe = snippets
-      .filter(Boolean)
-      .map(r => ({
-        name: clamp(String(r.name || "").trim(), 32),
-        stars: Math.max(0, Math.min(5, Number(r.stars) || 5)),
-        text: clamp(String(r.text || "").trim(), 190),
-      }))
-      .slice(0, 10);
+      const createCard = (r) => {
+        const card = document.createElement('article');
+        card.className = 'reviewCard';
 
-    const doubled = safe.concat(safe);
+        const rating = Math.max(1, Math.min(5, Math.round(Number(r.rating) || 5)));
+        const stars = '★★★★★'.slice(0, rating) + '☆☆☆☆☆'.slice(0, 5 - rating);
 
-    rail.innerHTML = doubled.map(r => {
-      const stars = "★★★★★".slice(0, r.stars) + "☆☆☆☆☆".slice(0, 5 - r.stars);
-      return `
-        <article class="review">
-          <div class="review__top">
-            <div class="review__name">${escapeHtml(r.name)}</div>
-            <div class="review__stars" aria-hidden="true">${stars}</div>
+        card.innerHTML = `
+          <div class="reviewCard__top">
+            <div class="reviewCard__name">${escapeHtml(r.author_name || 'Kunde')}</div>
+            <div class="reviewCard__time">${escapeHtml(r.relative_time || 'Google')}</div>
           </div>
-          <div class="review__text">${escapeHtml(r.text)}</div>
-        </article>
-      `;
-    }).join("");
-  }
+          <div class="reviewCard__stars" aria-hidden="true">${stars}</div>
+          <div class="reviewCard__text">${escapeHtml((r.text || '').trim())}</div>
+        `;
+        return card;
+      };
 
-  function enableAutoScroll(){
-    if (rail.scrollWidth <= rail.clientWidth + 10) return;
-
-    let raf = null;
-    let last = performance.now();
-    const speed = 0.35; // px/ms
-
-    const step = (t) => {
-      const dt = t - last;
-      last = t;
-
-      rail.scrollLeft += dt * speed;
-
-      const half = rail.scrollWidth / 2;
-      if (rail.scrollLeft >= half) rail.scrollLeft -= half;
-
-      raf = requestAnimationFrame(step);
-    };
-
-    const stop = () => { if (raf) cancelAnimationFrame(raf); raf = null; };
-    const start = () => { if (!raf) { last = performance.now(); raf = requestAnimationFrame(step); } };
-
-    rail.addEventListener('mouseenter', stop);
-    rail.addEventListener('mouseleave', start);
-    rail.addEventListener('touchstart', stop, { passive: true });
-    rail.addEventListener('touchend', start, { passive: true });
-    rail.addEventListener('wheel', stop, { passive: true });
-
-    start();
+      trackEl.innerHTML = '';
+      reviews.forEach(r => trackEl.appendChild(createCard(r)));
+      reviews.forEach(r => trackEl.appendChild(createCard(r))); // duplicate for loop
+    }catch(e){
+      console.error('Review-Loading failed', e);
+    }
   }
 
   function escapeHtml(str){
-    return str.replace(/[&<>"']/g, (m) => ({
+    return String(str).replace(/[&<>"']/g, (m) => ({
       "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
     }[m]));
   }
