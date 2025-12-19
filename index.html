@@ -15,33 +15,28 @@
 </head>
 
 <body>
+  <div class="globalBg" aria-hidden="true"></div>
   <a class="skip" href="#content">Zum Inhalt</a>
 
   <header class="topbar" data-elevate>
     <div class="container topbar__inner">
       <a class="brand" href="./index.html" aria-label="57 Autostudio Startseite">
         <span class="brand__mark brand__mark--img" aria-hidden="true"><img src="./57logo.png" alt="" loading="eager" decoding="async"></span>
-        <span class="brand__name">Autostudio</span>
       </a>
 
       <nav class="nav" aria-label="Hauptmenü">
         <a class="nav__link" href="#leistungen">Leistungen</a>
         <a class="nav__link" href="./xpel.html">XPEL Lackschutz</a>
         <a class="nav__link" href="./keramik.html">Keramik</a>
-</nav>
+        <a class="nav__link" href="#kontakt">Kontakt</a>
+      </nav>
 
       <div class="topbar__actions">
         <a class="pill pill--ghost" href="https://instagram.com/" target="_blank" rel="noreferrer" aria-label="Instagram öffnen">
-          <span class="pill__icon" aria-hidden="true">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-  <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Z" stroke="currentColor" stroke-width="1.6"/>
-  <path d="M12 16.1a4.1 4.1 0 1 0 0-8.2 4.1 4.1 0 0 0 0 8.2Z" stroke="currentColor" stroke-width="1.6"/>
-  <path d="M17.3 6.7h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-</svg>
-</span>
+          <span class="pill__icon" aria-hidden="true">⌁</span>
           Instagram
         </a>
-        <a class="pill pill--primary" href="https://wa.me/491604961151" target="_blank" rel="noreferrer">
+        <a class="pill pill--primary" href="https://wa.me/+49123456789" target="_blank" rel="noreferrer">
           WhatsApp Beratung
         </a>
 
@@ -56,18 +51,13 @@
         <a class="mobileNav__link" href="#leistungen">Leistungen</a>
         <a class="mobileNav__link" href="./xpel.html">XPEL Lackschutz</a>
         <a class="mobileNav__link" href="./keramik.html">Keramik</a>
-<div class="mobileNav__cta">
-          <a class="pill pill--primary pill--full" href="https://wa.me/491604961151" target="_blank" rel="noreferrer">
+        <a class="mobileNav__link" href="#kontakt">Kontakt</a>
+        <div class="mobileNav__cta">
+          <a class="pill pill--primary pill--full" href="https://wa.me/+49123456789" target="_blank" rel="noreferrer">
             WhatsApp Beratung
           </a>
           <a class="pill pill--ghost pill--full" href="https://instagram.com/" target="_blank" rel="noreferrer">
-            <span class="pill__icon" aria-hidden="true">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-  <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Z" stroke="currentColor" stroke-width="1.6"/>
-  <path d="M12 16.1a4.1 4.1 0 1 0 0-8.2 4.1 4.1 0 0 0 0 8.2Z" stroke="currentColor" stroke-width="1.6"/>
-  <path d="M17.3 6.7h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-</svg>
-</span>Instagram
+            Instagram
           </a>
         </div>
       </div>
@@ -91,7 +81,7 @@
           </p>
 
           <div class="hero__cta reveal">
-            <a class="pill pill--primary pill--lg" href="https://wa.me/491604961151" target="_blank" rel="noreferrer">
+            <a class="pill pill--primary pill--lg" href="https://wa.me/+49123456789" target="_blank" rel="noreferrer">
               Beratung per WhatsApp
             </a>
             <a class="pill pill--ghost pill--lg" href="#leistungen">
@@ -143,8 +133,12 @@
                 <div class="metric__note">Pflegehinweise inklusive</div>
               </div>
             </div>
-            <div class="glassCard__bottom glassLinks">
-              <a class="link" href="#kontakt">Angebot anfragen</a><a class="link" href="./xpel.html">XPEL Details</a><a class="link" href="./keramik.html">Keramik Details</a>
+            <div class="glassCard__bottom">
+              <a class="link" href="#kontakt">Angebot anfragen</a>
+              <span class="dot" aria-hidden="true"></span>
+              <a class="link" href="./xpel.html">XPEL Details</a>
+              <span class="dot" aria-hidden="true"></span>
+              <a class="link" href="./keramik.html">Keramik Details</a>
             </div>
           </div>
         </div>
@@ -155,31 +149,39 @@
     </section>
 
     <!-- GOOGLE REVIEWS -->
-    <section class="section section--tight">
+        <!-- GOOGLE REVIEWS -->
+    <section class="section section--tight" id="bewertungen">
       <div class="container">
-        <div class="reviewsBar reveal" aria-label="Google Bewertungen">
-          <div class="reviewsBar__left">
-            <div class="googleMark" aria-hidden="true">
-              <span class="gDot gDot--b"></span>
-              <span class="gDot gDot--r"></span>
-              <span class="gDot gDot--y"></span>
-              <span class="gDot gDot--g"></span>
-            </div>
-            <div class="reviewsBar__text">
-              <div class="reviewsBar__title">Google Bewertungen</div>
-              <div class="reviewsBar__meta" id="googleMeta">Profil öffnen für aktuelle Bewertungen</div>
-            </div>
-          </div>
-
-          <div class="reviewsBar__right">
-            <a class="pill pill--ghost" href="#" id="googleLink" target="_blank" rel="noreferrer">Google Profil</a>
-            <div class="stars" aria-hidden="true" title="Bewertungen">
-              <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-            </div>
-          </div>
+        <div class="sectionHead reveal">
+          <h2 class="h2">5.0 Sterne – live aus Google.</h2>
+          <p class="sub">
+            Keine Screenshots, keine „ausgewählten“ Zitate. Wir laden die neuesten Bewertungen
+            direkt aus dem Google‑Profil – automatisch aktualisiert.
+          </p>
         </div>
 
-        <div class="reviewRail reveal" id="reviewRail" aria-label="Ausgewählte Bewertungen"></div>
+        <div class="reviewsBox reveal">
+          <div class="reviewsBox__top">
+            <div class="reviewsBox__score">
+              <div class="reviewsBox__num">5.0</div>
+              <div class="reviewsBox__meta">
+                <div class="reviewsBox__stars" aria-hidden="true">★★★★★</div>
+                <div class="reviewsBox__hint">Google Bewertungen</div>
+              </div>
+            </div>
+
+            <a class="pill pill--ghost" id="googleLink" href="https://www.google.com/maps/search/?api=1&query=57%20Autostudio%2071691%20Freiberg%20am%20Neckar" target="_blank" rel="noreferrer">
+              <span class="pill__icon" aria-hidden="true">
+                <span class="gDot"></span>
+              </span>
+              Google Profil
+            </a>
+          </div>
+
+          <div class="reviewsMarquee" aria-label="Kundenbewertungen">
+            <div class="reviewsTrack" id="reviews-track"></div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -324,17 +326,11 @@
             </p>
 
             <div class="contact__actions">
-              <a class="pill pill--primary pill--lg pill--full" href="https://wa.me/491604961151" target="_blank" rel="noreferrer">
+              <a class="pill pill--primary pill--lg pill--full" href="https://wa.me/+49123456789" target="_blank" rel="noreferrer">
                 WhatsApp öffnen
               </a>
               <a class="pill pill--ghost pill--lg pill--full" href="https://instagram.com/" target="_blank" rel="noreferrer">
-                <span class="pill__icon" aria-hidden="true">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-  <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9A5.5 5.5 0 0 1 16.5 22h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Z" stroke="currentColor" stroke-width="1.6"/>
-  <path d="M12 16.1a4.1 4.1 0 1 0 0-8.2 4.1 4.1 0 0 0 0 8.2Z" stroke="currentColor" stroke-width="1.6"/>
-  <path d="M17.3 6.7h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-</svg>
-</span>Instagram
+                Instagram
               </a>
             </div>
 
@@ -378,7 +374,7 @@
       <div class="container footer__inner">
         <div class="footer__left">
           <div class="footer__brand">
-            <span class="brand__mark brand__mark--sm brand__mark--img" aria-hidden="true"><img src="./57logo.png" alt="" loading="lazy" decoding="async"></span>
+            <span class="brand__mark brand__mark--sm" aria-hidden="true">57</span>
             <span class="footer__name">Autostudio</span>
           </div>
           <div class="footer__sub">
@@ -387,7 +383,7 @@
           <div class="footer__social">
             <a class="footer__link" href="https://instagram.com/" target="_blank" rel="noreferrer">Instagram</a>
             <span class="dot" aria-hidden="true"></span>
-            <a class="footer__link" href="https://wa.me/491604961151" target="_blank" rel="noreferrer">WhatsApp</a>
+            <a class="footer__link" href="https://wa.me/+49123456789" target="_blank" rel="noreferrer">WhatsApp</a>
           </div>
         </div>
 
@@ -405,7 +401,7 @@
     </footer>
 
     <!-- floating WhatsApp -->
-    <a class="fab" href="https://wa.me/491604961151" target="_blank" rel="noreferrer" aria-label="WhatsApp Kontakt">
+    <a class="fab" href="https://wa.me/+49123456789" target="_blank" rel="noreferrer" aria-label="WhatsApp Kontakt">
       <span class="fab__ring" aria-hidden="true"></span>
       <span class="fab__icon" aria-hidden="true">✦</span>
       <span class="fab__text">WhatsApp</span>
