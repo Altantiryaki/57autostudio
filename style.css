@@ -1065,3 +1065,40 @@ body::after{
     --sectionY: 120px;
   }
 }
+
+/* =========================
+   PERF MODE (auto via JS)
+   ========================= */
+html.perf .spotlight::after{ display:none !important; }
+html.perf body::after{ display:none !important; } /* dein Noise Overlay ist teuer */
+html.perf .shimmer::after{ display:none !important; }
+
+html.perf .reveal{
+  filter:none !important;
+  transform: translate3d(0, 10px, 0) !important;
+  transition-duration: .45s !important;
+}
+html.perf .reveal.is-in{
+  transform: translate3d(0, 0, 0) !important;
+}
+
+/* Backdrop-filter ist der Hauptkiller in Firefox */
+html.perf .glass6,
+html.perf .glassCard,
+html.perf .topbar,
+html.perf .fab,
+html.perf .reviewsBox{
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Parallax etwas entschärfen */
+html.perf .bgSection::before{
+  transform: translate3d(0, 0px, 0) scale(1.03) !important;
+  will-change: auto !important;
+}
+
+/* Marquee langsamer (weniger Work) */
+html.perf .reviewsTrack{
+  animation-duration: 70s !important;
+}
