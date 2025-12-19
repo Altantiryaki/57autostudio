@@ -1,7 +1,6 @@
 // Optional: Fallback, falls du den Key/PlaceID nicht über env setzt.
 // >>> HIER deine echten Werte eintragen (oder leer lassen, wenn du nur env nutzt)
-const FALLBACK_GOOGLE_PLACES_API_KEY = "";
-const FALLBACK_GOOGLE_PLACE_ID = "";
+const FALLBACK_GOOGLE_PLACE_ID = "ChIJOWn9FC7VmUcRitgY38HREJM";
 
 // Holt die Google Reviews über Places Details API
 async function handleReviews(env) {
