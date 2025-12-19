@@ -416,7 +416,7 @@ img{max-width:100%; display:block}
     radial-gradient(120% 120% at 18% 0%, rgba(255,255,255,.12), transparent 55%),
     linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
   box-shadow: var(--shadow2);
-  padding: 18px 16px;
+  padding: 22px 20px;
 
   /* FIX: gleiche Höhe + Button immer unten */
   display:flex;
