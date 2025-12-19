@@ -898,7 +898,7 @@ body::after{
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: .20;
+  opacity: .15;
   pointer-events:none;
   z-index: 0;
   transform: translate3d(0, var(--p, 0px), 0) scale(1.06);
