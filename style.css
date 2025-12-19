@@ -906,8 +906,6 @@ body::after{
   .certBar__text{ font-size:11px; letter-spacing:.24em; }
 }
 
-
-}
 /* ===== Section background images (fade to transparent) ===== */
 .bgSection{
   position: relative;
