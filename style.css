@@ -682,7 +682,8 @@ img{max-width:100%; display:block}
   .hero__panel{margin-top:0}
   .hero__cta{display:flex; align-items:center; gap:12px}
   .trustRow{grid-template-columns:repeat(3, 1fr)}
-  .cards{grid-template-columns:repeat(4, 1fr); gap:14px}
+  .cards{grid-template-columns:repeat(3, 1fr); gap:14px}
+  .cards.cards--4{grid-template-columns:repeat(4, 1fr)}
   .steps{grid-template-columns:repeat(2, 1fr)}
   .contact{grid-template-columns: 1fr 1fr; gap:18px; align-items:start}
   .footer__inner{grid-template-columns: 1fr 1fr; align-items:start}
