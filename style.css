@@ -2,7 +2,7 @@
    No frameworks. Mobile-first. Apple-level restraint. */
 
 :root{
-  --sectionY: 200px; /* GLOBAL: Abstand zwischen Sections */
+  --sectionY: 160px; /* GLOBAL: Abstand zwischen Sections */
   --sectionY-tight: 220px;
 
   --bg0:#07080B;
