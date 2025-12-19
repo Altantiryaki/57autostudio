@@ -237,8 +237,17 @@ function fallbackReviews() {
     ok: true,
     updatedAt: new Date().toISOString(),
     reviews: [
-      { author_name: "Bewertung", rating: 5, text: "Kundenfeedback wird geladen." },
-      { author_name: "Info", rating: 5, text: "Die Anzeige aktualisiert sich automatisch." }
+      { author_name: "Sascha Wittenbecher", rating: 5, text: "Habe mein Auto bei 57 Autopflege den Lack aufbereiten lassen. Motorhaube war mega zerkratzt. Nach der Aufbereitung waren alle Kratzer weg. Die Jungs sind super freundlich und machen ihren Job richtig gut.Kann ich auf jeden Fall weiter empfehlen!" },
+      { author_name: "Florian Hirsch", rating: 5, text: "Hervorragende Arbeit und super nettes Team!!! Wir haben den Innenraum eines mit Holzstaub sehr verschmutzten Autos reinigen lassen und sind einfach nur begeistert. Der Innenraum sieht aus wie neu, hätten wir nicht für möglich gehalten. Absolut professionelle Arbeit und toller Service (Auto wurde sogar gebracht), zudem sind die Jungs äußerst freundlich und schnell ging es auch noch. Können wir nur empfehlen!!!" },
+      { author_name: "Sarah Weeber, rating: 5, text: "Tip Top Innenraumaufbereitung unseres Jeeps. Wir sind mit der erstklassigen Arbeit sehr zufrieden. Sehr hohes Niveau. Die Leute dort sind super freundlich und zuvorkommend. Wir werden wiederkommen." },
+      { author_name: "Sandy Grimm", rating: 5, text: "Ich bin absolut begeistert! Der Service war hervorragend – schnell, professionell und freundlich. Das Preis-Leistungs-Verhältnis ist unschlagbar. Ich kann es nur weiterempfehlen und werde definitiv wiederkommen. Vielen Dank für die tolle Arbeit!" },
+      { author_name: "Serkan Yilmaz", rating: 5, text: "Ich habe mein Auto bei 57 Autopflege aufbereiten lassen und bin wirklich begeistert! Die Mitarbeiter waren super freundlich und haben sich viel Zeit genommen, um alles genau zu erklären. Als ich mein Auto abholte, war ich einfach sprachlos – es sah aus wie neu! Die Liebe zum Detail war beeindruckend, und ich konnte die Sorgfalt, die in die Arbeit gesteckt wurde, wirklich spüren. Der Preis war absolut fair für die großartige Leistung. Ich kann 57 Autopflege nur wärmstens empfehlen und werde definitiv wiederkommen!" },
+      { author_name: "Simon Heber", rating: 5, text: "Erstklassige Arbeit was die da machen. Kompetent, Professionell, Aufmerksam und sehr freundlich. Ich bin innerhalb von 4 Wochen schon zum 3. Mal Kunde 😎.Es wird mit viel Leidenschaft und mit einem Auge zum Detail gearbeitet. Das gefällt mir 👍 …" },
+      { author_name: "Sinan Kirlitas", rating: 5, text: "Habe gestern mein Auto Polieren lassen und ich bin mehr als zufrieden. 5 sterne wären zu wenig für diese Arbeit die erbracht wurde. Top Jungs Top Leistung" },
+      { author_name: "Andrea Schwarz", rating: 5, text: "Top Innenreinigung meines sehr dreckigen Autos, wurde in Neu Zustand aufbereitet. Preis Leistung Top, super freundliche Mitarbeiter, ich werde euch weiter empfehlen" },
+      { author_name: "Monika Fröhlich", rating: 5, text: "Die super netten Jungs haben heute mein Auto gereinigt. Wow, super tolle Arbeit. Auto blitzeblank innen wie außen .Ihr macht euren Weg mit solch toller Leistung.  Liebe zum Detail hat man euch und meinem Auto angesehen ." },
+      { author_name: "Dani", rating: 5, text: "Die Jungs sind klasse und machen eine fantastische Arbeit. Ich habe mein Auto hingebracht, wohlgemerkt ein Hundeauto! Innen sah es sehr sehr schlimm aus. Doch die Jungs haben alle Haare, jeden Fleck und allen Dreck entfernt. Ich bin begeistert und kann 57 Autopflege sehr empfehlen!!
+" }
     ]
   };
 }
