@@ -84,41 +84,28 @@ export default {
     const url = new URL(request.url);
     const pathname = url.pathname;
 
-    // 1) Reviews-Endpoint abfangen
+    // 1) Reviews-Endpoint
     if (pathname === "/reviews") {
       return handleReviews(env);
     }
 
-    // 2) Asset-Routing: /exclusive -> /exclusive.html etc.
-    let pathToFile = pathname;
+    // 2) Erst: Assets/Pages ganz normal bedienen lassen (inkl. / -> index)
+    let res = await env.ASSETS.fetch(request);
+    if (res.status !== 404) return res;
 
-    // Wenn kein Punkt im Pfad, behandeln wir es als "clean URL"
-    if (!pathToFile.includes(".")) {
-      if (pathToFile === "/") {
-        pathToFile = "/index.html";
-      } else {
-        pathToFile = `${pathToFile}.html`;
-      }
+    // 3) Fallback: nur wenn Clean-URL nicht gefunden, .html versuchen
+    // z.B. /xpel -> /xpel.html
+    if (!pathname.includes(".") && pathname !== "/") {
+      const htmlUrl = new URL(request.url);
+      htmlUrl.pathname = `${pathname}.html`;
+
+      res = await env.ASSETS.fetch(new Request(htmlUrl.toString(), request));
+      if (res.status !== 404) return res;
     }
 
-    try {
-      // Versuche, die angefragte Datei aus dem Asset-Bundle zu holen
-      const assetResponse = await env.ASSETS.fetch(
-        new Request(url.origin + pathToFile, request)
-      );
-
-      // Wenn gefunden, zurückgeben
-      if (assetResponse.status !== 404) {
-        return assetResponse;
-      }
-    } catch (e) {
-      // Ignorieren und auf Fallback gehen
-      console.error("Asset fetch error:", e);
-    }
-
-    // 3) Fallback: immer index.html ausliefern (z.B. für 404 oder SPA)
-    return env.ASSETS.fetch(
-      new Request(url.origin + "/index.html", request)
-    );
+    // 4) Letzter Fallback: Root ausliefern (NICHT /index.html, sonst Loop möglich)
+    const rootUrl = new URL(request.url);
+    rootUrl.pathname = "/";
+    return env.ASSETS.fetch(new Request(rootUrl.toString(), request));
   }
 };
