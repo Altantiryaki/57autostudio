@@ -877,13 +877,24 @@ body::after{
   align-items: center;
   text-align: center;
 }
-
 .certBar__text {
   font-size: 0.9rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: rgba(255,255,255,0.75);
   font-weight: 500;
+.certBar__logo{
+  height:18px;
+  width:auto;
+  display:block;
+}
+
+/* Mobile Feintuning */
+@media (max-width: 768px){
+  .certBar__logo{ height:16px; }
+  .certBar__content{ gap:10px; }
+}
+   
 }
 /* ===== Section background images (fade to transparent) ===== */
 .bgSection{
