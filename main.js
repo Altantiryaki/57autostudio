@@ -157,3 +157,147 @@
     }[m]));
   }
 })();
+
+// =========================
+// KEYNOTE PRO PACK (ADD-ON)
+// =========================
+(() => {
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) return;
+
+  // A) Scroll progress bar
+  let bar = document.querySelector(".scrollProg");
+  if (!bar) {
+    bar = document.createElement("div");
+    bar.className = "scrollProg";
+    document.body.appendChild(bar);
+  }
+
+  // B) Kinetic split (opt-in): add data-kinetic on headings
+  const kineticEls = [...document.querySelectorAll("[data-kinetic]")];
+  kineticEls.forEach(el => {
+    if (el.dataset.kineticDone) return;
+    el.dataset.kineticDone = "1";
+    el.classList.add("kinetic");
+
+    const text = el.textContent;
+    el.textContent = "";
+    const words = text.split(/(\s+)/); // keep spaces
+    let wi = 0;
+    words.forEach(w => {
+      if (/^\s+$/.test(w)) {
+        el.appendChild(document.createTextNode(w));
+      } else {
+        const span = document.createElement("span");
+        span.className = "w";
+        span.style.setProperty("--wi", wi++);
+        span.textContent = w;
+        el.appendChild(span);
+      }
+    });
+  });
+
+  // C) Spotlight (opt-in): add class "spotlight" on sections
+  const spotSecs = [...document.querySelectorAll(".spotlight")];
+
+  // D) Shimmer (opt-in): add class "shimmer" on elements you want to sweep
+  const shimmerEls = [...document.querySelectorAll(".shimmer")];
+
+  // E) Tilt (opt-in): add data-tilt on cards/glass
+  const tiltEls = [...document.querySelectorAll("[data-tilt]")];
+
+  // F) Divider glow progress (opt-in): add .divGlow element inside a section
+  const divGlows = [...document.querySelectorAll(".divGlow")];
+
+  // Keep footer excluded from motion (your rule)
+  const isInFooter = (el) => el.closest("footer") || el.closest(".footer");
+
+  // Hook kinetic into existing reveal: when .reveal becomes is-in, also mark kinetic
+  const obs = new MutationObserver((muts) => {
+    muts.forEach(m => {
+      if (m.type === "attributes" && m.attributeName === "class") {
+        const el = m.target;
+        if (el.classList.contains("is-in")) {
+          if (el.matches("[data-kinetic]")) el.classList.add("is-in");
+          if (el.classList.contains("shimmer") && !isInFooter(el)) {
+            // fire shimmer once
+            el.classList.add("is-shimmer");
+            setTimeout(() => el.classList.remove("is-shimmer"), 1600);
+          }
+        }
+      }
+    });
+  });
+
+  // Observe reveal elements (already exist) to add shimmer/kinetic without touching your IO
+  document.querySelectorAll(".reveal").forEach(el => {
+    if (!isInFooter(el)) obs.observe(el, { attributes: true });
+  });
+
+  // Tilt interactions
+  tiltEls.forEach(el => {
+    if (isInFooter(el)) return;
+    el.classList.add("tilt");
+
+    el.addEventListener("pointermove", (ev) => {
+      const r = el.getBoundingClientRect();
+      const px = (ev.clientX - r.left) / r.width;   // 0..1
+      const py = (ev.clientY - r.top) / r.height;   // 0..1
+      const ry = (px - 0.5) * 10;                   // deg
+      const rx = (0.5 - py) * 10;                   // deg
+      const tx = (px - 0.5) * 6;                    // px
+      const ty = (py - 0.5) * 6;                    // px
+      el.style.setProperty("--rx", `${rx.toFixed(2)}deg`);
+      el.style.setProperty("--ry", `${ry.toFixed(2)}deg`);
+      el.style.setProperty("--tx", `${tx.toFixed(2)}px`);
+      el.style.setProperty("--ty", `${ty.toFixed(2)}px`);
+    }, { passive: true });
+
+    el.addEventListener("pointerleave", () => {
+      el.style.setProperty("--rx", `0deg`);
+      el.style.setProperty("--ry", `0deg`);
+      el.style.setProperty("--tx", `0px`);
+      el.style.setProperty("--ty", `0px`);
+    });
+  });
+
+  // Scroll loop (progress + spotlight + divider glow)
+  let ticking = false;
+  const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+
+      const doc = document.documentElement;
+      const max = (doc.scrollHeight - window.innerHeight) || 1;
+      const p = (window.scrollY / max) * 100;
+      doc.style.setProperty("--sp", p.toFixed(3));
+
+      // Spotlight follows viewport center
+      const vh = window.innerHeight;
+      spotSecs.forEach(sec => {
+        if (isInFooter(sec)) return;
+        const r = sec.getBoundingClientRect();
+        const cx = 50; // keep centered horizontally (looks premium)
+        const cy = ((vh * 0.5 - r.top) / r.height) * 100;
+        sec.style.setProperty("--sx", `${cx}%`);
+        sec.style.setProperty("--sy", `${Math.max(15, Math.min(85, cy))}%`);
+      });
+
+      // Divider glow: progress within section
+      divGlows.forEach(line => {
+        if (isInFooter(line)) return;
+        const sec = line.closest("section") || line.parentElement;
+        const r = sec.getBoundingClientRect();
+        const t = (vh * 0.65 - r.top) / (r.height || 1);
+        const dp = Math.max(0, Math.min(1, t));
+        line.style.setProperty("--dp", dp.toFixed(3));
+      });
+    });
+  };
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+  onScroll();
+})();
