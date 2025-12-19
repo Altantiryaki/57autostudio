@@ -98,33 +98,63 @@ export default {
     }
 
     // IMPORTANT: /reviews must be handled BEFORE assets
-    if (url.pathname === "/reviews") {
-      try {
-        const out = await scrapeGoogleReviews(env);
-        return new Response(JSON.stringify(out), {
-          status: 200,
-          headers: {
-            "content-type": "application/json; charset=utf-8",
-            "access-control-allow-origin": "*",
-            "cache-control": "public, max-age=0, s-maxage=600"
-          }
-        });
-      } catch (e) {
-        return new Response(JSON.stringify({ ok: false, error: String(e?.message || e) }), {
-          status: 500,
-          headers: {
-            "content-type": "application/json; charset=utf-8",
-            "access-control-allow-origin": "*",
-            "cache-control": "no-store"
-          }
-        });
+if (url.pathname === "/reviews") {
+  const cacheKey = "reviews:v1";
+
+  // 1) Try KV cache first
+  const cached = await env.REVIEWS_KV?.get(cacheKey, "text");
+  if (cached) {
+    return new Response(cached, {
+      status: 200,
+      headers: {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, s-maxage=1800" // 30min edge hint
       }
+    });
+  }
+
+  // 2) Fetch fresh
+  try {
+    const out = await scrapeGoogleReviews(env);
+    const body = JSON.stringify(out);
+
+    // store 30 minutes
+    await env.REVIEWS_KV?.put(cacheKey, body, { expirationTtl: 1800 });
+
+    return new Response(body, {
+      status: 200,
+      headers: {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, s-maxage=1800"
+      }
+    });
+  } catch (e) {
+    // 3) If blocked (429 etc), try stale cache if any
+    const stale = await env.REVIEWS_KV?.get(cacheKey, "text");
+    if (stale) {
+      return new Response(stale, {
+        status: 200,
+        headers: {
+          "content-type": "application/json; charset=utf-8",
+          "access-control-allow-origin": "*",
+          "cache-control": "public, max-age=0, s-maxage=600",
+          "x-reviews-stale": "1"
+        }
+      });
     }
 
-    // Everything else: Pages handles pretty URLs
-    return env.ASSETS.fetch(request);
+    return new Response(JSON.stringify({ ok: false, error: String(e?.message || e) }), {
+      status: 500,
+      headers: {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "*",
+        "cache-control": "no-store"
+      }
+    });
   }
-};
+}
 
 function buildMapsUrl(env) {
   if (env.GOOGLE_MAPS_URL && String(env.GOOGLE_MAPS_URL).trim()) {
