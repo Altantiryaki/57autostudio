@@ -1,4 +1,15 @@
+// PERF MODE (Firefox/Mobile/Low CPU)
 (() => {
+  const ua = navigator.userAgent.toLowerCase();
+  const isFirefox = ua.includes("firefox");
+  const isMobile = matchMedia("(max-width: 820px)").matches;
+  const hc = navigator.hardwareConcurrency || 8;
+  const lowCPU = hc <= 4;
+
+  if (isFirefox || isMobile || lowCPU) {
+    document.documentElement.classList.add("perf");
+  }
+})();
   const qs = (s, el = document) => el.querySelector(s);
   const qsa = (s, el = document) => Array.from(el.querySelectorAll(s));
 
