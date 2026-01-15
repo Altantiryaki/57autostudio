@@ -978,3 +978,10 @@ body::after{
     --sectionY-tight: 120px; /* oder 140px, wenn du Reviews etwas luftiger willst */
   }
 }
+/* ============================= */
+/* LEISTUNGEN – spacing override */
+/* ============================= */
+
+.page-leistungen .section + .section {
+  padding-top: calc(var(--section-space) * 0.85);
+}
