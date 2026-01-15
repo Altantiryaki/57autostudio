@@ -983,7 +983,3 @@ body::after{
 .page-leistungen .section.bgSection:first-of-type{
   padding-bottom: calc(var(--sectionY) + 18vh);
 }
-/* Leistungen: Background-Bild dezenter */
-.page-leistungen .bgSection::before{
-  opacity: 0.6; /* Standard ist bei dir ~0.85–1 */
-}
