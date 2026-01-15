@@ -978,10 +978,8 @@ body::after{
     --sectionY-tight: 120px; /* oder 140px, wenn du Reviews etwas luftiger willst */
   }
 }
-/* ============================= */
-/* LEISTUNGEN – spacing override */
-/* ============================= */
 
-.page-leistungen .section + .section {
-  padding-top: calc(var(--section-space) * 0.85);
+/* Leistungen: Hero mehr Raum nach unten */
+.page-leistungen .section.bgSection:first-of-type{
+  padding-bottom: calc(var(--sectionY) + 18vh);
 }
