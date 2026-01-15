@@ -983,3 +983,20 @@ body::after{
 .page-leistungen .section.bgSection:first-of-type{
   padding-bottom: calc(var(--sectionY) + 18vh);
 }
+/* Leistungen: weicherer, tieferer Fade */
+.page-leistungen .bgSection.fade-bottom::before{
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black 82%,
+    rgba(0,0,0,.6) 92%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black 82%,
+    rgba(0,0,0,.6) 92%,
+    transparent 100%
+  );
+}
