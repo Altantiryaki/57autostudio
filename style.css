@@ -979,7 +979,22 @@ body::after{
   }
 }
 
-/* Leistungen: Hero mehr Raum nach unten */
-.page-leistungen .section.bgSection:first-of-type{
-  padding-bottom: calc(var(--sectionY) + 18vh);
+/* Leistungen: sehr weicher Fade von unten */
+.page-leistungen .fade-bottom::before{
+  -webkit-mask-image: linear-gradient(
+    to top,
+    transparent 0%,
+    rgba(0,0,0,.15) 20%,
+    rgba(0,0,0,.45) 45%,
+    rgba(0,0,0,.85) 75%,
+    black 100%
+  );
+  mask-image: linear-gradient(
+    to top,
+    transparent 0%,
+    rgba(0,0,0,.15) 20%,
+    rgba(0,0,0,.45) 45%,
+    rgba(0,0,0,.85) 75%,
+    black 100%
+  );
 }
